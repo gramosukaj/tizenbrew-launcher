@@ -5,7 +5,8 @@ cd "$(dirname "$0")"
 
 git push
 
-REPO="gh/gramosukaj/tizenbrew-launcher"
+# @main : sans version, jsDelivr reste figé sur un ancien commit.
+REPO="gh/gramosukaj/tizenbrew-launcher@main"
 for file in package.json service.js app/index.html app/config.js app/launcher.js; do
   curl -s -o /dev/null -w "purge $file: %{http_code}\n" "https://purge.jsdelivr.net/$REPO/$file"
 done

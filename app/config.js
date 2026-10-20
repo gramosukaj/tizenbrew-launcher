@@ -4,7 +4,7 @@ window.LAUNCHER_CONFIG = {
   // Modules TizenBrew : nom affiché et couleur par module (sinon appName + couleur par défaut).
   modules: {
     title: 'TizenBrew',
-    hidden: ['gh/gramosukaj/tizenbrew-launcher'],
+    hidden: ['gh/gramosukaj/tizenbrew-launcher@main'],
     labels: {
       'npm/@foxreis/tizentube': { name: 'YouTube', sub: 'sans pub', color: '#FF0033' },
       'npm/tizentwitch': { name: 'Twitch', sub: 'sans pub', color: '#9146FF' },

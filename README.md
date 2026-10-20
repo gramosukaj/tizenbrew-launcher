@@ -4,7 +4,9 @@ Un écran d'accueil minimaliste pour TV Samsung (Tizen) : tes applis TV et tes m
 
 ## Installation
 
-Dans TizenBrew : gestionnaire de modules → **Ajouter un Module GitHub** → `gramosukaj/tizenbrew-launcher`.
+Dans TizenBrew : gestionnaire de modules → **Ajouter un Module GitHub** → `gramosukaj/tizenbrew-launcher@main`.
+
+Le `@main` compte : sans lui, jsDelivr reste figé sur un ancien commit.
 
 Pour l'ouvrir à chaque lancement de TizenBrew : **Paramètres → Paramètres AutoLaunch → Accueil**.
 Pour revenir au menu TizenBrew malgré l'AutoLaunch, appuie sur ↑ pendant que TizenBrew démarre.

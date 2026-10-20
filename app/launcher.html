@@ -164,11 +164,12 @@
       background: rgba(4, 5, 8, 0.78);
       display: flex; align-items: center; justify-content: center;
       opacity: 0; pointer-events: none; transition: opacity 280ms var(--ease-in-out);
+      will-change: opacity;
     }
     .overlay.on { opacity: 1; }
     .panel {
       width: 1660px; padding: 56px 64px 48px; border-radius: 40px;
-      background: #121419; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 40px 120px rgba(0, 0, 0, 0.6);
+      background: #121419; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
       transform: translateY(24px) scale(0.98); transition: transform 420ms var(--ease-out);
     }
     .overlay.on .panel { transform: none; }

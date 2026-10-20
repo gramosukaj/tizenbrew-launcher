@@ -1,8 +1,8 @@
 {
   "name": "tizenbrew-launcher",
   "appName": "Accueil",
-  "version": "1.1.1",
-  "description": "Lanceur léger : tes applis TV et tes modules TizenBrew sur un seul écran.",
+  "version": "2.0.0",
+  "description": "Accueil premium : tes applis TV et tes modules TizenBrew, avec logos et animations.",
   "packageType": "app",
   "appPath": "app/index.html",
   "serviceFile": "service.js",

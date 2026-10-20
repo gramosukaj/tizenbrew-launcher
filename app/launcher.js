@@ -629,10 +629,12 @@
     $('overlay').classList.add('on');
   }
 
-  function closePanel(focusKey) {
+  // Sans changement (annulation), la sélection d'avant est intacte : rien à reconstruire.
+  function closePanel(focusKey, changed) {
     $('overlay').classList.remove('on');
     zone = panel.returnZone;
     panel = null;
+    if (!changed) return;
     const libraryKey = zone === 'library' && currentItem().key;
     renderDock();
     renderLibrary();
@@ -653,7 +655,7 @@
     else if (code === KEY.RIGHT && !panel.onRemove && panel.index < Math.min(panel.others.length, MAX_FAVORITES - 1)) panel.index++;
     else if (code === KEY.DOWN && panel.wasFavorite) panel.onRemove = true;
     else if (code === KEY.UP) panel.onRemove = false;
-    else if (code === KEY.BACK || code === KEY.ESCAPE) return closePanel(panel.item.key);
+    else if (code === KEY.BACK || code === KEY.ESCAPE) return closePanel(panel.item.key, false);
     else return;
     renderPanel();
   }
@@ -667,7 +669,7 @@
       saveFavorites(panelLayout().kept);
       toast(wasFavorite ? `${item.name} déplacé` : `${item.name} épinglé sur l'accueil`);
     }
-    closePanel(item.key);
+    closePanel(item.key, true);
   }
 
   // --- Télécommande : OK court = ouvrir, OK maintenu = épingler ---

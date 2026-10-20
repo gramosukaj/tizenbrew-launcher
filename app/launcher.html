@@ -18,12 +18,12 @@
     :root {
       --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
       --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-      --card-w: 300px;
-      --card-h: 169px;
-      --gap: 30px;
       --side: 96px;
       --text: #F4F5F8;
-      --muted: rgba(244, 245, 248, 0.58);
+      --muted: rgba(244, 245, 248, 0.6);
+      --faint: rgba(244, 245, 248, 0.38);
+      --glass: rgba(255, 255, 255, 0.07);
+      --glass-line: rgba(255, 255, 255, 0.1);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,7 +34,7 @@
       -webkit-font-smoothing: antialiased;
       letter-spacing: -0.01em;
     }
-    img { display: block; }
+    img, svg { display: block; }
 
     /* --- Lumière d'ambiance : deux canvas en fondu enchaîné ---
        Dessinés en 192×108 et étirés à l'écran : un dégradé reste doux une fois agrandi,
@@ -49,66 +49,81 @@
     .ambient-layer.on { opacity: 1; }
     .vignette {
       position: fixed; inset: 0; pointer-events: none;
-      background:
-        linear-gradient(180deg, rgba(6, 7, 10, 0) 38%, rgba(6, 7, 10, 0.92) 62%, #06070A 100%),
-        radial-gradient(1400px 900px at 50% 40%, transparent 50%, rgba(0, 0, 0, 0.55) 100%);
+      background: radial-gradient(1500px 1000px at 50% 45%, transparent 45%, rgba(0, 0, 0, 0.6) 100%);
     }
 
-    /* --- Barre du haut --- */
-    .topbar {
-      position: fixed; top: 52px; left: var(--side); right: var(--side);
-      display: flex; justify-content: space-between; align-items: flex-start;
-    }
-    .greeting { font-size: 30px; font-weight: 650; letter-spacing: -0.02em; }
-    .date { font-size: 22px; font-weight: 450; color: var(--muted); margin-top: 6px; }
+    /* --- Deux écrans empilés : l'accueil puis toutes les applis --- */
+    .stage { position: fixed; left: 0; top: 0; width: 1920px; transition: transform 760ms var(--ease-out); will-change: transform; }
+    .stage.library-open { transform: translateY(-1080px); }
+    .screen { position: relative; width: 1920px; height: 1080px; }
+
+    /* --- Accueil : heure, météo, raccourcis --- */
+    .clock-block { position: absolute; top: 76px; left: var(--side); }
+    .greeting { font-size: 30px; font-weight: 600; color: rgba(244, 245, 248, 0.82); }
     .time {
-      font-size: 54px; font-weight: 300; letter-spacing: -0.03em; line-height: 1;
+      font-size: 156px; font-weight: 600; letter-spacing: -0.05em; line-height: 1; margin: 6px 0 10px -6px;
       font-feature-settings: 'tnum' 1;
     }
+    .date { font-size: 32px; font-weight: 600; }
+    .weather { display: flex; align-items: center; gap: 12px; margin-top: 14px; font-size: 28px; font-weight: 500; color: var(--muted); }
+    .weather svg { width: 38px; height: 38px; }
 
-    /* --- Mise en avant de l'élément sélectionné --- */
-    .hero {
-      position: fixed; top: 170px; left: var(--side); right: var(--side); height: 360px;
-      display: flex; justify-content: space-between; align-items: center;
+    .actions { position: absolute; top: 76px; right: var(--side); display: flex; gap: 16px; }
+    .pill {
+      display: flex; align-items: center; gap: 12px;
+      height: 60px; padding: 0 26px; border-radius: 999px;
+      font-size: 22px; font-weight: 600;
+      background: var(--glass); box-shadow: inset 0 0 0 1px var(--glass-line);
+      transition: transform 280ms var(--ease-out), background-color 200ms, color 200ms;
     }
-    .hero-text { width: 900px; }
-    .hero-kicker {
-      font-size: 20px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 18px;
-    }
-    .hero-title { font-size: 84px; font-weight: 750; letter-spacing: -0.035em; line-height: 1; }
-    .hero-tagline { font-size: 30px; font-weight: 400; color: var(--muted); margin-top: 22px; line-height: 1.35; }
-    .hero-meta { display: flex; gap: 14px; margin-top: 30px; }
-    .chip {
-      font-size: 19px; font-weight: 550; color: var(--text);
-      padding: 9px 18px; border-radius: 999px;
-      background: rgba(255, 255, 255, 0.1);
-    }
-    .chip.primary { background: #F4F5F8; color: #0B0C10; display: flex; align-items: center; gap: 10px; }
-    .chip .key {
-      font-size: 14px; font-weight: 750; letter-spacing: 0.04em;
-      padding: 3px 8px; border-radius: 7px; background: #0B0C10; color: #F4F5F8;
-    }
-    .hero-art { position: relative; width: 600px; height: 338px; flex: 0 0 auto; }
-    /* Ombre sur un calque fixe : jamais repeinte quand l'image change. */
-    .hero-art::before {
-      content: ''; position: absolute; inset: 0; border-radius: 30px;
-      box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55);
-      will-change: transform;
-    }
-    .hero-art .art {
-      position: absolute; inset: 0; border-radius: 30px; overflow: hidden;
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-      opacity: 0; transition: opacity 420ms var(--ease-in-out);
-      will-change: opacity;
-    }
-    .hero-art .art.on { opacity: 1; }
+    .pill svg { width: 26px; height: 26px; }
+    .pill.focus { background: #F4F5F8; color: #0B0C10; transform: scale(1.08); }
 
-    /* --- Fond de carte (tuiles, mise en avant, écran de lancement) --- */
-    .face {
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
+    /* --- Rail des favoris --- */
+    .spotlight {
+      position: absolute; left: 0; right: 0; top: 640px; text-align: center;
     }
+    .spotlight-name { font-size: 40px; font-weight: 750; letter-spacing: -0.03em; }
+    .spotlight-tagline { font-size: 24px; font-weight: 450; color: var(--muted); margin-top: 8px; }
+    .dock {
+      position: absolute; left: 50%; bottom: 126px; transform: translateX(-50%);
+      display: flex; gap: 22px; padding: 22px; border-radius: 38px;
+      background: var(--glass); box-shadow: inset 0 0 0 1px var(--glass-line), 0 30px 80px rgba(0, 0, 0, 0.45);
+    }
+    .dock .tile { width: 216px; height: 122px; }
+    .dock-empty { font-size: 24px; color: var(--muted); padding: 40px 60px; }
+    .scroll-hint {
+      position: absolute; left: 0; right: 0; bottom: 44px;
+      display: flex; justify-content: center; align-items: center; gap: 10px;
+      font-size: 20px; font-weight: 550; color: var(--faint);
+    }
+    .scroll-hint svg { width: 22px; height: 22px; }
+
+    /* --- Cartes (rail, rangées, panneau) --- */
+    .tile { position: relative; flex: 0 0 auto; transition: transform 340ms var(--ease-out); }
+    .tile::before {
+      content: ''; position: absolute; inset: 12% 4% -4%;
+      border-radius: 24px; box-shadow: 0 20px 34px rgba(0, 0, 0, 0.7);
+      opacity: 0; transition: opacity 340ms var(--ease-out);
+    }
+    .card { position: absolute; inset: 0; border-radius: 18px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07); }
+    .ring {
+      position: absolute; inset: -7px; border-radius: 25px;
+      box-shadow: 0 0 0 4px #FFFFFF;
+      opacity: 0; transform: scale(0.97);
+      transition: opacity 240ms var(--ease-out), transform 340ms var(--ease-out);
+    }
+    .tile.focus { transform: scale(1.14); z-index: 2; }
+    .tile.focus::before { opacity: 1; }
+    .tile.focus .ring { opacity: 1; transform: none; }
+    .tile.pressed { transform: scale(1.05); transition-duration: 160ms; }
+    .fav-mark {
+      position: absolute; top: 9px; right: 9px; width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(0, 0, 0, 0.45); display: flex; align-items: center; justify-content: center;
+    }
+    .fav-mark svg { width: 15px; height: 15px; }
+
+    .face { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
     /* Reflet par-dessus le logo : uniforme même quand l'icône a son propre fond. */
     .face::after {
       content: ''; position: absolute; inset: 0;
@@ -116,79 +131,84 @@
     }
     .face img { position: relative; max-width: 62%; max-height: 42%; object-fit: contain; }
     .face img.white { filter: brightness(0) invert(1); }
-    .face .monogram { position: relative; font-size: 44px; font-weight: 750; letter-spacing: -0.03em; }
+    .face .monogram { position: relative; font-size: 36px; font-weight: 750; letter-spacing: -0.03em; }
     .face .badge {
-      position: absolute; right: 14px; bottom: 12px;
-      font-size: 15px; font-weight: 700; letter-spacing: 0.06em;
-      padding: 4px 10px; border-radius: 8px;
+      position: absolute; right: 12px; bottom: 10px;
+      font-size: 14px; font-weight: 700; letter-spacing: 0.06em;
+      padding: 3px 9px; border-radius: 7px;
       background: rgba(0, 0, 0, 0.35); color: #fff;
     }
 
-    /* --- Rangées --- */
-    .shelf { position: fixed; top: 600px; left: 0; right: 0; bottom: 0; }
+    /* --- Toutes les applis --- */
+    .library-head { position: absolute; top: 84px; left: var(--side); right: var(--side); }
+    .library-kicker { font-size: 20px; font-weight: 650; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+    .library-title { font-size: 64px; font-weight: 750; letter-spacing: -0.035em; line-height: 1; margin-top: 16px; }
+    .library-tagline { font-size: 26px; color: var(--muted); margin-top: 14px; }
+    .shelf { position: absolute; top: 330px; left: 0; right: 0; bottom: 0; }
     .rows { transition: transform 520ms var(--ease-out); will-change: transform; }
-    .row {
-      padding: 0 var(--side); height: 262px;
-      transition: opacity 420ms var(--ease-in-out);
-      will-change: opacity;
-    }
+    .row { padding: 0 var(--side); height: 262px; transition: opacity 420ms var(--ease-in-out); will-change: opacity; }
     .row.above { opacity: 0; }
-    .row.below { opacity: 0.38; }
-    .row-title { font-size: 25px; font-weight: 650; letter-spacing: -0.01em; margin-bottom: 26px; color: var(--muted); }
+    .row.below { opacity: 0.4; }
+    .row-title { font-size: 25px; font-weight: 650; margin-bottom: 26px; color: var(--muted); }
     .row.current .row-title { color: var(--text); }
-    .track { display: flex; gap: var(--gap); transition: transform 480ms var(--ease-out); will-change: transform; }
+    .track { display: flex; gap: 30px; transition: transform 480ms var(--ease-out); will-change: transform; }
+    .track .tile { width: 300px; height: 169px; }
+    .fade-bottom {
+      position: absolute; left: 0; right: 0; bottom: 0; height: 190px; pointer-events: none;
+      background: linear-gradient(180deg, rgba(6, 7, 10, 0) 0%, rgba(6, 7, 10, 0.85) 70%, #06070A 100%);
+    }
 
-    .tile {
-      position: relative; flex: 0 0 auto;
-      width: var(--card-w); height: var(--card-h);
-      transition: transform 360ms var(--ease-out);
+    /* --- Panneau « épingler sur l'accueil » --- */
+    .overlay {
+      position: fixed; inset: 0; z-index: 20;
+      background: rgba(4, 5, 8, 0.78);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 280ms var(--ease-in-out);
     }
-    .tile::before {
-      content: ''; position: absolute; inset: 14px 10px -6px;
-      border-radius: 24px; box-shadow: 0 22px 34px rgba(0, 0, 0, 0.7);
-      opacity: 0; transition: opacity 360ms var(--ease-out);
+    .overlay.on { opacity: 1; }
+    .panel {
+      width: 1660px; padding: 56px 64px 48px; border-radius: 40px;
+      background: #121419; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 40px 120px rgba(0, 0, 0, 0.6);
+      transform: translateY(24px) scale(0.98); transition: transform 420ms var(--ease-out);
     }
-    .card {
-      position: absolute; inset: 0; border-radius: 20px; overflow: hidden;
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+    .overlay.on .panel { transform: none; }
+    .panel-title { font-size: 40px; font-weight: 750; letter-spacing: -0.03em; }
+    .panel-subtitle { font-size: 24px; color: var(--muted); margin-top: 10px; }
+    .slots { display: flex; justify-content: center; gap: 18px; margin: 54px 0 46px; height: 160px; }
+    .slot { display: flex; flex-direction: column; align-items: center; gap: 16px; transition: opacity 260ms; }
+    .slot .tile { width: 168px; height: 95px; }
+    .slot-number { font-size: 19px; font-weight: 650; color: var(--faint); }
+    .slot.candidate .slot-number { color: var(--text); }
+    .slot.other { opacity: 0.5; }
+    .slot.dropped { opacity: 0.18; }
+    .panel-actions { display: flex; justify-content: space-between; align-items: center; }
+    .panel-keys { display: flex; gap: 14px; font-size: 21px; font-weight: 550; color: var(--muted); }
+    .panel-keys span { display: flex; align-items: center; gap: 10px; }
+    .key {
+      font-size: 14px; font-weight: 750; letter-spacing: 0.04em;
+      padding: 4px 9px; border-radius: 7px; background: rgba(255, 255, 255, 0.14); color: var(--text);
     }
-    .ring {
-      position: absolute; inset: -7px; border-radius: 27px;
-      box-shadow: 0 0 0 4px #FFFFFF;
-      opacity: 0; transform: scale(0.97);
-      transition: opacity 260ms var(--ease-out), transform 360ms var(--ease-out);
-    }
-    .tile.focus { transform: scale(1.12); z-index: 2; }
-    .tile.focus::before { opacity: 1; }
-    .tile.focus .ring { opacity: 1; transform: none; }
-    .tile.pressed { transform: scale(1.04); transition-duration: 140ms; }
+    .panel-remove { opacity: 1; }
+    .panel-remove.hidden { visibility: hidden; }
 
     /* --- Apparition au démarrage --- */
-    .intro .topbar, .intro .hero, .intro .row { opacity: 0; }
-    .boot .topbar, .boot .hero, .boot .row { animation: rise 900ms var(--ease-out) both; }
-    .boot .hero { animation-delay: 80ms; }
-    .boot .row:nth-child(1) { animation-delay: 180ms; }
-    .boot .row:nth-child(2) { animation-delay: 260ms; }
-    .boot .row:nth-child(n+3) { animation-delay: 340ms; }
-    @keyframes rise { from { opacity: 0; transform: translateY(24px); } }
+    .intro .clock-block, .intro .actions, .intro .spotlight, .intro .dock, .intro .scroll-hint { opacity: 0; }
+    .boot .clock-block, .boot .actions, .boot .spotlight, .boot .dock, .boot .scroll-hint { animation: rise 1000ms var(--ease-out) both; }
+    .boot .actions { animation-delay: 80ms; }
+    .boot .spotlight { animation-delay: 200ms; }
+    .boot .dock { animation-name: rise-dock; animation-delay: 260ms; }
+    .boot .scroll-hint { animation-delay: 420ms; }
+    @keyframes rise { from { opacity: 0; transform: translateY(26px); } }
+    @keyframes rise-dock { from { opacity: 0; transform: translate(-50%, 40px); } }
 
     /* --- Écran de lancement --- */
-    .splash {
-      position: fixed; inset: 0; z-index: 10;
-      opacity: 0; pointer-events: none;
-      transition: opacity 280ms var(--ease-in-out);
-    }
+    .splash { position: fixed; inset: 0; z-index: 30; opacity: 0; pointer-events: none; transition: opacity 280ms var(--ease-in-out); }
     .splash.on { opacity: 1; }
     .splash .face img { max-width: 36%; max-height: 22%; transform: scale(0.94); transition: transform 900ms var(--ease-out); }
     .splash.on .face img { transform: none; }
 
-    /* --- Fondu en bas d'écran sur la rangée suivante --- */
-    .fade-bottom {
-      position: fixed; left: 0; right: 0; bottom: 0; height: 190px; pointer-events: none;
-      background: linear-gradient(180deg, rgba(6, 7, 10, 0) 0%, rgba(6, 7, 10, 0.85) 70%, #06070A 100%);
-    }
     .toast {
-      position: fixed; left: 50%; bottom: 90px; z-index: 11;
+      position: fixed; left: 50%; bottom: 70px; z-index: 31;
       padding: 16px 30px; border-radius: 16px;
       background: rgba(30, 32, 40, 0.96); font-size: 24px; font-weight: 550;
       opacity: 0; transform: translate(-50%, 12px);
@@ -204,27 +224,45 @@
   </div>
   <div class="vignette"></div>
 
-  <header class="topbar">
-    <div>
-      <div class="greeting" id="greeting"></div>
-      <div class="date" id="date"></div>
+  <div class="stage" id="stage">
+    <section class="screen" id="home">
+      <div class="clock-block">
+        <div class="greeting" id="greeting"></div>
+        <div class="time" id="time"></div>
+        <div class="date" id="date"></div>
+        <div class="weather" id="weather"></div>
+      </div>
+      <div class="actions" id="actions"></div>
+      <div class="spotlight" id="spotlight">
+        <div class="spotlight-name" id="spotlight-name"></div>
+        <div class="spotlight-tagline" id="spotlight-tagline"></div>
+      </div>
+      <div class="dock" id="dock"></div>
+      <div class="scroll-hint" id="scroll-hint"></div>
+    </section>
+
+    <section class="screen" id="library">
+      <div class="library-head" id="library-head">
+        <div class="library-kicker" id="library-kicker"></div>
+        <div class="library-title" id="library-title"></div>
+        <div class="library-tagline" id="library-tagline"></div>
+      </div>
+      <div class="shelf"><div class="rows" id="rows"></div></div>
+      <div class="fade-bottom"></div>
+    </section>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="panel">
+      <div class="panel-title" id="panel-title"></div>
+      <div class="panel-subtitle" id="panel-subtitle"></div>
+      <div class="slots" id="slots"></div>
+      <div class="panel-actions">
+        <div class="panel-keys" id="panel-keys"></div>
+        <div class="pill panel-remove" id="panel-remove"></div>
+      </div>
     </div>
-    <div class="time" id="time"></div>
-  </header>
-
-  <section class="hero">
-    <div class="hero-text" id="hero-text">
-      <div class="hero-kicker" id="hero-kicker"></div>
-      <div class="hero-title" id="hero-title"></div>
-      <div class="hero-tagline" id="hero-tagline"></div>
-      <div class="hero-meta" id="hero-meta"></div>
-    </div>
-    <div class="hero-art"><div class="art"></div><div class="art"></div></div>
-  </section>
-
-  <main class="shelf"><div class="rows" id="rows"></div></main>
-
-  <div class="fade-bottom"></div>
+  </div>
 
   <div class="splash" id="splash"></div>
   <div class="toast" id="toast"></div>

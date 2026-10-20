@@ -10,6 +10,26 @@
 //   text       : couleur du nom quand il n'y a pas de logo
 //   badge      : petite étiquette en bas à droite de la carte
 window.LAUNCHER_CONFIG = {
+  user: { name: 'Gramos' },
+
+  // Météo actuelle via Open-Meteo (gratuit, sans compte). null pour la masquer.
+  weather: { city: 'Châlons-en-Champagne', latitude: 48.954, longitude: 4.367 },
+
+  // Rail de l'accueil. Ces favoris par défaut sont remplacés dès qu'on en épingle un
+  // (OK maintenu sur une appli) : la liste est alors gardée sur la TV.
+  maxFavorites: 7,
+  favorites: [
+    'org.tizen.netflix-app', 'npm/@foxreis/tizentube', 'npm/tizentwitch',
+    'org.tizen.primevideo', 'MCmYXNxgcu.DisneyPlus', 'znCs95n93Q.OqeeTV'
+  ],
+
+  // Raccourcis en haut à droite de l'accueil (applis système Samsung).
+  actions: [
+    { label: 'Entrées', icon: 'input', app: 'org.tizen.SMSourceAPP' },
+    { label: 'Réseau', icon: 'wifi', app: 'com.samsung.tv.coba.setting.networksettings', network: true },
+    { label: 'Paramètres', icon: 'settings', app: 'com.samsung.tv.coba.setting' }
+  ],
+
   modules: {
     title: 'TizenBrew',
     // Modules à ne pas afficher (début du nom) : le lanceur lui-même, quelle que soit sa version.

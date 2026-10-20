@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920, height=1080">
+  <title>Accueil</title>
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+        href="https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5/files/inter-latin-wght-normal.woff2">
+  <style>
+    @font-face {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 100 900;
+      font-display: swap;
+      src: url('https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5/files/inter-latin-wght-normal.woff2') format('woff2');
+    }
+
+    :root {
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+      --card-w: 300px;
+      --card-h: 169px;
+      --gap: 30px;
+      --side: 96px;
+      --text: #F4F5F8;
+      --muted: rgba(244, 245, 248, 0.58);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 1920px; height: 1080px; overflow: hidden; background: #06070A; }
+    body {
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      letter-spacing: -0.01em;
+    }
+    img { display: block; }
+
+    /* --- Lumière d'ambiance : deux canvas en fondu enchaîné ---
+       Dessinés en 192×108 et étirés à l'écran : un dégradé reste doux une fois agrandi,
+       et la TV n'a presque rien à recalculer quand la couleur change. */
+    .ambient { position: fixed; inset: 0; pointer-events: none; }
+    .ambient-layer {
+      position: absolute; inset: 0; width: 1920px; height: 1080px;
+      opacity: 0;
+      transition: opacity 900ms var(--ease-in-out);
+      will-change: opacity;
+    }
+    .ambient-layer.on { opacity: 1; }
+    .vignette {
+      position: fixed; inset: 0; pointer-events: none;
+      background:
+        linear-gradient(180deg, rgba(6, 7, 10, 0) 38%, rgba(6, 7, 10, 0.92) 62%, #06070A 100%),
+        radial-gradient(1400px 900px at 50% 40%, transparent 50%, rgba(0, 0, 0, 0.55) 100%);
+    }
+
+    /* --- Barre du haut --- */
+    .topbar {
+      position: fixed; top: 52px; left: var(--side); right: var(--side);
+      display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    .greeting { font-size: 30px; font-weight: 650; letter-spacing: -0.02em; }
+    .date { font-size: 22px; font-weight: 450; color: var(--muted); margin-top: 6px; }
+    .time {
+      font-size: 54px; font-weight: 300; letter-spacing: -0.03em; line-height: 1;
+      font-feature-settings: 'tnum' 1;
+    }
+
+    /* --- Mise en avant de l'élément sélectionné --- */
+    .hero {
+      position: fixed; top: 170px; left: var(--side); right: var(--side); height: 360px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .hero-text { width: 900px; }
+    .hero-kicker {
+      font-size: 20px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 18px;
+    }
+    .hero-title { font-size: 84px; font-weight: 750; letter-spacing: -0.035em; line-height: 1; }
+    .hero-tagline { font-size: 30px; font-weight: 400; color: var(--muted); margin-top: 22px; line-height: 1.35; }
+    .hero-meta { display: flex; gap: 14px; margin-top: 30px; }
+    .chip {
+      font-size: 19px; font-weight: 550; color: var(--text);
+      padding: 9px 18px; border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .chip.primary { background: #F4F5F8; color: #0B0C10; display: flex; align-items: center; gap: 10px; }
+    .chip .key {
+      font-size: 14px; font-weight: 750; letter-spacing: 0.04em;
+      padding: 3px 8px; border-radius: 7px; background: #0B0C10; color: #F4F5F8;
+    }
+    .hero-art { position: relative; width: 600px; height: 338px; flex: 0 0 auto; }
+    /* Ombre sur un calque fixe : jamais repeinte quand l'image change. */
+    .hero-art::before {
+      content: ''; position: absolute; inset: 0; border-radius: 30px;
+      box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55);
+      will-change: transform;
+    }
+    .hero-art .art {
+      position: absolute; inset: 0; border-radius: 30px; overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+      opacity: 0; transition: opacity 420ms var(--ease-in-out);
+      will-change: opacity;
+    }
+    .hero-art .art.on { opacity: 1; }
+
+    /* --- Fond de carte (tuiles, mise en avant, écran de lancement) --- */
+    .face {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    /* Reflet par-dessus le logo : uniforme même quand l'icône a son propre fond. */
+    .face::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 42%);
+    }
+    .face img { position: relative; max-width: 62%; max-height: 42%; object-fit: contain; }
+    .face img.white { filter: brightness(0) invert(1); }
+    .face .monogram { position: relative; font-size: 44px; font-weight: 750; letter-spacing: -0.03em; }
+    .face .badge {
+      position: absolute; right: 14px; bottom: 12px;
+      font-size: 15px; font-weight: 700; letter-spacing: 0.06em;
+      padding: 4px 10px; border-radius: 8px;
+      background: rgba(0, 0, 0, 0.35); color: #fff;
+    }
+
+    /* --- Rangées --- */
+    .shelf { position: fixed; top: 600px; left: 0; right: 0; bottom: 0; }
+    .rows { transition: transform 520ms var(--ease-out); will-change: transform; }
+    .row {
+      padding: 0 var(--side); height: 262px;
+      transition: opacity 420ms var(--ease-in-out);
+      will-change: opacity;
+    }
+    .row.above { opacity: 0; }
+    .row.below { opacity: 0.38; }
+    .row-title { font-size: 25px; font-weight: 650; letter-spacing: -0.01em; margin-bottom: 26px; color: var(--muted); }
+    .row.current .row-title { color: var(--text); }
+    .track { display: flex; gap: var(--gap); transition: transform 480ms var(--ease-out); will-change: transform; }
+
+    .tile {
+      position: relative; flex: 0 0 auto;
+      width: var(--card-w); height: var(--card-h);
+      transition: transform 360ms var(--ease-out);
+    }
+    .tile::before {
+      content: ''; position: absolute; inset: 14px 10px -6px;
+      border-radius: 24px; box-shadow: 0 22px 34px rgba(0, 0, 0, 0.7);
+      opacity: 0; transition: opacity 360ms var(--ease-out);
+    }
+    .card {
+      position: absolute; inset: 0; border-radius: 20px; overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+    }
+    .ring {
+      position: absolute; inset: -7px; border-radius: 27px;
+      box-shadow: 0 0 0 4px #FFFFFF;
+      opacity: 0; transform: scale(0.97);
+      transition: opacity 260ms var(--ease-out), transform 360ms var(--ease-out);
+    }
+    .tile.focus { transform: scale(1.12); z-index: 2; }
+    .tile.focus::before { opacity: 1; }
+    .tile.focus .ring { opacity: 1; transform: none; }
+    .tile.pressed { transform: scale(1.04); transition-duration: 140ms; }
+
+    /* --- Apparition au démarrage --- */
+    .intro .topbar, .intro .hero, .intro .row { opacity: 0; }
+    .boot .topbar, .boot .hero, .boot .row { animation: rise 900ms var(--ease-out) both; }
+    .boot .hero { animation-delay: 80ms; }
+    .boot .row:nth-child(1) { animation-delay: 180ms; }
+    .boot .row:nth-child(2) { animation-delay: 260ms; }
+    .boot .row:nth-child(n+3) { animation-delay: 340ms; }
+    @keyframes rise { from { opacity: 0; transform: translateY(24px); } }
+
+    /* --- Écran de lancement --- */
+    .splash {
+      position: fixed; inset: 0; z-index: 10;
+      opacity: 0; pointer-events: none;
+      transition: opacity 280ms var(--ease-in-out);
+    }
+    .splash.on { opacity: 1; }
+    .splash .face img { max-width: 36%; max-height: 22%; transform: scale(0.94); transition: transform 900ms var(--ease-out); }
+    .splash.on .face img { transform: none; }
+
+    /* --- Fondu en bas d'écran sur la rangée suivante --- */
+    .fade-bottom {
+      position: fixed; left: 0; right: 0; bottom: 0; height: 190px; pointer-events: none;
+      background: linear-gradient(180deg, rgba(6, 7, 10, 0) 0%, rgba(6, 7, 10, 0.85) 70%, #06070A 100%);
+    }
+    .toast {
+      position: fixed; left: 50%; bottom: 90px; z-index: 11;
+      padding: 16px 30px; border-radius: 16px;
+      background: rgba(30, 32, 40, 0.96); font-size: 24px; font-weight: 550;
+      opacity: 0; transform: translate(-50%, 12px);
+      transition: opacity 260ms var(--ease-out), transform 260ms var(--ease-out);
+    }
+    .toast.on { opacity: 1; transform: translate(-50%, 0); }
+  </style>
+</head>
+<body class="intro">
+  <div class="ambient">
+    <canvas class="ambient-layer" width="192" height="108"></canvas>
+    <canvas class="ambient-layer" width="192" height="108"></canvas>
+  </div>
+  <div class="vignette"></div>
+
+  <header class="topbar">
+    <div>
+      <div class="greeting" id="greeting"></div>
+      <div class="date" id="date"></div>
+    </div>
+    <div class="time" id="time"></div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-text" id="hero-text">
+      <div class="hero-kicker" id="hero-kicker"></div>
+      <div class="hero-title" id="hero-title"></div>
+      <div class="hero-tagline" id="hero-tagline"></div>
+      <div class="hero-meta" id="hero-meta"></div>
+    </div>
+    <div class="hero-art"><div class="art"></div><div class="art"></div></div>
+  </section>
+
+  <main class="shelf"><div class="rows" id="rows"></div></main>
+
+  <div class="fade-bottom"></div>
+
+  <div class="splash" id="splash"></div>
+  <div class="toast" id="toast"></div>
+
+  <script src="config.js"></script>
+  <script src="launcher.js"></script>
+</body>
+</html>

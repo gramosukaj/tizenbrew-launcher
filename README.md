@@ -13,7 +13,8 @@ Pour revenir au menu TizenBrew malgré l'AutoLaunch, appuie sur ↑ pendant que 
 
 ## Fonctionnement
 
-- `app/` : la page du lanceur (servie par TizenBrew depuis jsDelivr).
+- `app/index.html` : page de démarrage chargée par TizenBrew (via jsDelivr). Elle récupère le lanceur sur GitHub Pages (`https://gramosukaj.github.io/tizenbrew-launcher/app/`), à jour environ une minute après un push, alors que jsDelivr peut garder d'anciennes versions en cache pendant des heures. Si GitHub Pages ne répond pas, elle se rabat sur jsDelivr.
+- `app/launcher.html`, `app/launcher.js`, `app/config.js`, `app/logos/` : le lanceur lui-même. Pour un aperçu sur ordinateur, ouvre `app/launcher.html` via un petit serveur local.
 - `service.js` : petit service Node lancé par TizenBrew. La page n'a pas accès à l'API `tizen`, ce service lui fournit la liste des applis installées et leur lancement sur `http://127.0.0.1:8095`. Il tourne tant que la TV n'est pas redémarrée : une modification de ce fichier demande un redémarrage complet de la TV.
 
 ## Personnaliser
@@ -28,4 +29,4 @@ Les logos des marques (`app/logos/`) appartiennent à leurs propriétaires respe
 ./deploy.sh
 ```
 
-Pousse sur GitHub puis vide le cache jsDelivr. Relance ensuite TizenBrew sur la TV.
+Pousse sur GitHub puis vide le cache jsDelivr. GitHub Pages se met à jour en une minute environ : relance ensuite TizenBrew sur la TV.

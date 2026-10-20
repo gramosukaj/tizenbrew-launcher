@@ -10,9 +10,6 @@
 //   text       : couleur du nom quand il n'y a pas de logo
 //   badge      : petite étiquette en bas à droite de la carte
 window.LAUNCHER_CONFIG = {
-  // Logos servis par jsDelivr quand la page tourne dans TizenBrew.
-  assetsBase: 'https://cdn.jsdelivr.net/gh/gramosukaj/tizenbrew-launcher@main/app/',
-
   modules: {
     title: 'TizenBrew',
     hidden: ['gh/gramosukaj/tizenbrew-launcher@main'],

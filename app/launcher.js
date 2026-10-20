@@ -4,9 +4,6 @@
   const config = window.LAUNCHER_CONFIG;
   const SERVICE_URL = 'ws://127.0.0.1:8081';    // service TizenBrew
   const APPS_URL = 'http://127.0.0.1:8095';      // service du lanceur (service.js)
-  // Via TizenBrew, la page passe par un proxy qui ne met rien en cache : les logos viennent
-  // alors directement de jsDelivr, que le navigateur garde en cache.
-  const ASSETS = location.pathname.startsWith('/module/') ? config.assetsBase : '';
   const Events = { Ready: -1, GetModules: 4, LaunchModule: 5, Error: 8 };
   const KEY = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40, ENTER: 13 };
   const DAYS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
@@ -83,7 +80,7 @@
       const img = el('img');
       img.decoding = 'async';
       img.alt = name;
-      img.src = ASSETS + 'logos/' + brand.logo;
+      img.src = 'logos/' + brand.logo;
       if (brand.white) img.className = 'white';
       if (brand.logoHeight) img.style.maxHeight = brand.logoHeight + '%';
       img.onerror = () => { img.remove(); fallback(); };

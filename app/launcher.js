@@ -229,7 +229,7 @@
       const { type, payload } = JSON.parse(event.data);
       if (type === Events.GetModules) {
         if (payload === null) return setTimeout(() => send({ type: Events.GetModules }), 500);
-        modules = payload.filter(m => m.appPath && !config.modules.hidden.includes(m.fullName));
+        modules = payload.filter(m => m.appPath && !config.modules.hidden.some(prefix => m.fullName.startsWith(prefix)));
         send({ type: Events.Ready });
         refresh();
       } else if (type === Events.LaunchModule && pendingModule) {

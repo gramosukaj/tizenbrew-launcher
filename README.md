@@ -6,7 +6,7 @@ Un écran d'accueil pour TV Samsung (Tizen) : tes applis TV et tes modules Tizen
 
 Dans TizenBrew : gestionnaire de modules → **Ajouter un Module GitHub** → `gramosukaj/tizenbrew-launcher@main`.
 
-Le `@main` compte : sans lui, jsDelivr reste figé sur un ancien commit.
+Le `@main` compte : sans lui, jsDelivr reste figé sur un ancien commit. jsDelivr peut aussi servir `@main` en retard de plusieurs heures ; pour une installation fiable, remplace `main` par l'identifiant d'un commit récent (`@<sha>`). Ce n'est que la page de démarrage : le lanceur lui-même est toujours chargé à jour depuis GitHub Pages.
 
 Pour l'ouvrir à chaque lancement de TizenBrew : **Paramètres → Paramètres AutoLaunch → Accueil**.
 Pour revenir au menu TizenBrew malgré l'AutoLaunch, appuie sur ↑ pendant que TizenBrew démarre.

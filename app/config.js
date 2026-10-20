@@ -12,7 +12,8 @@
 window.LAUNCHER_CONFIG = {
   modules: {
     title: 'TizenBrew',
-    hidden: ['gh/gramosukaj/tizenbrew-launcher@main'],
+    // Modules à ne pas afficher (début du nom) : le lanceur lui-même, quelle que soit sa version.
+    hidden: ['gh/gramosukaj/tizenbrew-launcher'],
     brands: {
       'npm/@foxreis/tizentube': {
         name: 'YouTube', tagline: 'Sans publicité, avec SponsorBlock et DeArrow',

@@ -2,9 +2,10 @@
   'use strict';
 
   const config = window.LAUNCHER_CONFIG;
-  const SERVICE_URL = 'ws://127.0.0.1:8081';
+  const SERVICE_URL = 'ws://127.0.0.1:8081';    // service TizenBrew
+  const APPS_URL = 'http://127.0.0.1:8095';      // service du lanceur (service.js)
   const Events = { Ready: -1, GetModules: 4, LaunchModule: 5, Error: 8 };
-  const KEY = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40, ENTER: 13, BACK: 10009, BACKSPACE: 8, ESCAPE: 27 };
+  const KEY = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40, ENTER: 13 };
   const DAYS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
   const MONTHS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
   const FOCUS_KEY = 'launcher.focus';
@@ -45,20 +46,16 @@
 
   // --- Lancement ---
 
+  // La page n'a pas accès à l'API tizen : lancement et liste des applis passent par service.js.
   function launchApp(app) {
-    if (!window.tizen) return toast('Ouverture de ' + app.name + ' (hors TV)');
-    try {
-      tizen.application.launch(app.id, null, () => toast("Impossible d'ouvrir " + app.name));
-    } catch (e) {
-      toast("Impossible d'ouvrir " + app.name);
-    }
+    fetch(APPS_URL + '/launch?id=' + encodeURIComponent(app.id))
+      .then(res => { if (!res.ok) throw new Error(); })
+      .catch(() => toast("Impossible d'ouvrir " + app.name));
   }
 
+  // Les touches des modules sont enregistrées par TizenBrew à l'ouverture du lanceur (champ "keys" du package.json).
   function launchModule(mdl) {
     if (!socket || socket.readyState !== WebSocket.OPEN) return toast('Service TizenBrew non connecté');
-    for (const key of mdl.keys || []) {
-      try { tizen.tvinputdevice.registerKey(key); } catch (e) { /* touche non enregistrable : on l'ignore */ }
-    }
     send({ type: Events.LaunchModule, payload: mdl });
     if (mdl.evaluateScriptOnDocumentStart) pendingModule = mdl;
     else location.href = mdl.appPath;
@@ -185,10 +182,6 @@
       case KEY.UP: if (r > 0) focus(r - 1, Math.min(c, grid[r - 1].length - 1)); break;
       case KEY.DOWN: if (r < grid.length - 1) focus(r + 1, Math.min(c, grid[r + 1].length - 1)); break;
       case KEY.ENTER: grid[r][c].run(); break;
-      case KEY.BACK:
-      case KEY.ESCAPE:
-        if (window.tizen) tizen.application.getCurrentApplication().exit();
-        break;
       default: return;
     }
     event.preventDefault();
@@ -196,20 +189,20 @@
 
   // --- Démarrage ---
 
-  function loadInstalledApps(done) {
-    if (!window.tizen) return done();
-    try {
-      tizen.application.getAppsInfo(list => {
+  // service.js démarre en même temps que la page : on réessaie le temps qu'il soit prêt.
+  function loadInstalledApps(attempt = 1) {
+    fetch(APPS_URL + '/apps')
+      .then(res => res.json())
+      .then(ids => {
         installed = {};
-        for (const app of list) installed[app.id] = true;
-        done();
-      }, () => done());
-    } catch (e) {
-      done();
-    }
+        for (const id of ids) installed[id] = true;
+        render();
+      })
+      .catch(() => { if (attempt < 20) setTimeout(() => loadInstalledApps(attempt + 1), 500); });
   }
 
   updateClock();
-  loadInstalledApps(render);
+  render();
+  loadInstalledApps();
   connectService();
 })();

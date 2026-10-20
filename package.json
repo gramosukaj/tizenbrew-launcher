@@ -1,10 +1,17 @@
 {
   "name": "tizenbrew-launcher",
   "appName": "Accueil",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Lanceur léger : tes applis TV et tes modules TizenBrew sur un seul écran.",
   "packageType": "app",
   "appPath": "app/index.html",
-  "keys": [],
+  "serviceFile": "service.js",
+  "keys": [
+    "MediaPlayPause", "MediaPlay", "MediaPause", "MediaStop",
+    "MediaFastForward", "MediaRewind", "MediaTrackNext", "MediaTrackPrevious",
+    "ChannelUp", "ChannelDown",
+    "ColorF0Red", "ColorF1Green", "ColorF2Yellow", "ColorF3Blue",
+    "Guide", "Info"
+  ],
   "license": "MIT"
 }
